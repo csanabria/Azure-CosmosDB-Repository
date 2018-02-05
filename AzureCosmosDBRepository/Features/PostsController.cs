@@ -50,7 +50,7 @@ namespace AzureCosmosDBRepository.Features
                 return new NoContentResult();
 
         }
-        [HttpGet("{id}")]
+        [HttpGet("{id}", Name = "GetById")]
         [SwaggerOperation("Get Post By Id")]
         [SwaggerResponse((int)HttpStatusCode.OK, typeof(Post))]
         [SwaggerResponse((int)HttpStatusCode.NotFound, typeof(NoContentResult))]
@@ -111,9 +111,10 @@ namespace AzureCosmosDBRepository.Features
             if (!ModelState.IsValid)
                 return new BadRequestObjectResult(ModelState.Select(m => m.Value.Errors.Select(e => e.ErrorMessage)));
 
+            var id = Guid.NewGuid().ToString();
             var post = new Post()
             {
-                Id = Guid.NewGuid().ToString(),
+                Id = id,
                 Title = value.Title,
                 Abstract = value.Abstract,
                 Content = value.Content,
@@ -123,7 +124,7 @@ namespace AzureCosmosDBRepository.Features
 
             await _repository.CreatePostAsync(post);
 
-            return new NoContentResult();
+            return new CreatedAtRouteResult("GetById", new { Id = id }, post);
         }
 
         [HttpPut("{id}")]
@@ -175,7 +176,7 @@ namespace AzureCosmosDBRepository.Features
                 return new NoContentResult();
         }
 
-        [HttpGet("{postId}/comments/{id}")]
+        [HttpGet("{postId}/comments/{id}", Name = "GetCommentById")]
         [SwaggerOperation("Get Comment By Id")]
         [SwaggerResponse((int)HttpStatusCode.OK, typeof(Comment))]
         [SwaggerResponse((int)HttpStatusCode.NotFound, typeof(NoContentResult))]
@@ -199,9 +200,10 @@ namespace AzureCosmosDBRepository.Features
             if (!ModelState.IsValid)
                 return new BadRequestObjectResult(ModelState.Select(m => m.Value.Errors.Select(e => e.ErrorMessage)));
 
+            var id = Guid.NewGuid().ToString();
             var comment = new Comment()
             {
-                Id = Guid.NewGuid().ToString(),
+                Id = id,
                 Publisher = value.Publisher,
                 Content = value.Content,
                 PublishDate = DateTime.Now
@@ -209,7 +211,7 @@ namespace AzureCosmosDBRepository.Features
 
             await _commentsRepository.CreateCommentAsync(comment, postId);
 
-            return new NoContentResult();
+            return new CreatedAtRouteResult("GetCommentById", new { Id = id }, comment);
         }
 
         [HttpDelete("{postId}/comments/{id}")]
